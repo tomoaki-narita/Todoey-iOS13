@@ -5,6 +5,10 @@
 //  Created by Philipp Muellauer on 02/12/2019.
 //  Copyright © 2019 App Brewery. All rights reserved.
 //
+/*
+ エンコードとデコードの概念
+ 音楽で言えばエンコードは、音楽を読み込んでレコードに刻み、デコードはレコードを読み込んで音楽に戻すというような概念
+ */
 
 import UIKit
 
@@ -12,9 +16,9 @@ class TodoListViewController: UITableViewController {
 
     var itemArray = [Item]() //cellに表示させたい値を代入しておく配列。(Item型の配列)
     
-    let defaults = UserDefaults.standard
+    //let defaults = UserDefaults.standard
     
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist") //データを保存する保存先のpathと、Items.plistファイルを作成しそのファイルに保存する
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,26 +26,19 @@ class TodoListViewController: UITableViewController {
         navigationController?.navigationBar.barTintColor = .systemBlue //ナビゲーションバーのタイトルの背景色
         navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white] //ナビゲーションバーのタイトルの色
         
-        let newItem = Item() //ItemClassをインスタンス化
-        newItem.title = "Find Mike"
-        itemArray.append(newItem)
+//        let newItem = Item() //ItemClassをインスタンス化
+//        newItem.title = "Find Mike"
+//        itemArray.append(newItem)
+//        
+//        let newItem2 = Item()
+//        newItem2.title = "Buy Eggos"
+//        itemArray.append(newItem2)
+//        
+//        let newItem3 = Item()
+//        newItem3.title = "Destroy Demogorgon"
+//        itemArray.append(newItem3)
         
-        let newItem2 = Item()
-        newItem2.title = "Buy Eggos"
-        itemArray.append(newItem2)
-        
-        let newItem3 = Item()
-        newItem3.title = "Destroy Demogorgon"
-        itemArray.append(newItem3)
-        
-        
-        
-        
-        //TodoListArrayに保存した配列を読み込んで代入。保存した値を再代入するのでappを終了して再起動しても前回の状態で表示できる
-        //アンラップ成功(保存された値があれば)string型の配列にキャストしてitemsに代入
-//        if let  items = defaults.array(forKey: "TodoListArray") as? [Item] {
-//            itemArray = items //itemsに代入されている値(保存されている値をstring型の配列にキャストした値)をitemArrayに代入
-//        }
+        loadItems()
     }
     
 //MARK: - Tableview Datasource Methods
@@ -112,17 +109,28 @@ class TodoListViewController: UITableViewController {
     
     //MARK: - Model Manupulation Methods
     func savaItems() {
-        let encoder = PropertyListEncoder()
+        let encoder = PropertyListEncoder() //itemArrayをplistにエンコードするためにPropertyListEncoderをインスタンス化
         
         do {
-            let data = try encoder.encode(itemArray)
-            try data.write(to: dataFilePath!)
+            let data = try encoder.encode(itemArray) //itemArrayをエンコードして、dataに代入
+            try data.write(to: dataFilePath!) //itamPlistにエンコードしたdataを保存
         } catch {
             print("Error encoding item array, \(error)")
         }
        // self.defaults.set(self.itemArray, forKey: "TodoListArray") //アプリを終了してもデータが消えないようにdeviceに保存。TodoListArrayというkeyでitemArrayの値を保存する
         self.tableView.reloadData() //tableViewをリロード
         
+    }
+    
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!) { //データの保存先から保存されているデータを取得し、if letでアンラップ
+            let decoder = PropertyListDecoder() //plistをデコードするので、PropertyListEncoderをdecoderとしてインスタンス化
+            do {
+            itemArray = try decoder.decode([Item].self, from: data) //取得したデータをItem型の配列にデコードして、itemArrayに戻す
+            } catch {
+                print("Error decoding item array, \(error)")
+            }
+        }
     }
 }
 

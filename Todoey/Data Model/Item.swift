@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Item: Encodable {
+class Item: Codable { //デコードとエンコードを準拠するためにスーパークラスをCodableに
     var title: String = ""
     var done: Bool = false
 }
